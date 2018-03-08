@@ -1,0 +1,2 @@
+#!/bin/sh
+dbus-send --session --dest=org.f5n.timetracker --type=method_call --print-reply /TimeTracker org.f5n.timetracker.stopTracking
