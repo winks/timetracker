@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
     isTracking(false),
     timeElapsed(0)
 {
+    timer = new QTimer(this);
+    timer->start(1000);
     ui->setupUi(this);
     ui->label->setText("Elapsed time (s):");
     ui->lcdNumber->setDigitCount(5);
@@ -29,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aStart,   SIGNAL(triggered()), this, SLOT(startTracking()));
     connect(aStop,    SIGNAL(triggered()), this, SLOT(stopTracking()));
     connect(aQuit,    SIGNAL(triggered()), this, SLOT(close()));
+    connect(timer,    SIGNAL(timeout()),   this, SLOT(tick()));
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(toggleWindow(QSystemTrayIcon::ActivationReason)));
 
@@ -68,6 +71,7 @@ void MainWindow::startTracking()
     QDateTime now = QDateTime::currentDateTimeUtc();
     qDebug() << QString("startTracking @ %1").arg(now.toString());
     lastStarted = now;
+    lastTick = now;
     updateStuff();
 }
 
@@ -78,9 +82,22 @@ void MainWindow::stopTracking()
 
     QDateTime now = QDateTime::currentDateTimeUtc();
     qDebug() << QString("stopTracking @ %1").arg(now.toString());
-    qint64 diff = lastStarted.msecsTo(now) / 1000;
+    qint64 diff = lastTick.msecsTo(now);
     timeElapsed += diff;
-    qDebug() << QString("stopTracking += %1 (%2)").arg(diff).arg(timeElapsed);
+    qDebug() << QString("stopTracking += %1 (%2)").arg(diff).arg(getElapsedSeconds());
+    updateStuff();
+}
+
+void MainWindow::tick()
+{
+    if (!isTracking) {
+        return;
+    }
+    QDateTime now = QDateTime::currentDateTimeUtc();
+    qint64 diff = lastTick.msecsTo(now);
+    lastTick = now;
+    timeElapsed += diff;
+    qDebug() << QString("tick %1").arg(getElapsedSeconds());
     updateStuff();
 }
 
@@ -118,14 +135,15 @@ void MainWindow::updateStuff()
     }
     // update "elapsed" context menu item
     if (timeElapsed > 0) {
-        QString elapsed = QString("elapsed: %1").arg(formatTime(timeElapsed));
+        QString elapsed = QString("elapsed: %1").arg(formatTime(getElapsedSeconds()));
         aElapsed->setText(elapsed);
         if (trayMenu->actions().size() == 4) {
             trayMenu->insertAction(aSep1, aElapsed);
             aSep2 = trayMenu->insertSeparator(aElapsed);
         }
+        trayMenu->update();
     }
-    ui->lcdNumber->display(QString::number(timeElapsed));
+    ui->lcdNumber->display(QString::number(getElapsedSeconds()));
 }
 
 QString MainWindow::formatTime(const qint64 & seconds_)
@@ -154,4 +172,9 @@ QString MainWindow::formatTime(const qint64 & seconds_)
     rv += QString::number(seconds);
     rv += "s";
     return rv;
+}
+
+qint64 MainWindow::getElapsedSeconds()
+{
+    return timeElapsed / 1000;
 }
