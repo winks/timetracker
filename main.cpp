@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     MainWindow win;
     new TimetrackerAdaptor(&win);
     QDBusConnection conn = QDBusConnection::sessionBus();
-    conn.registerObject("/org/f5n/timetracker/TimeTracker", &win);
+    conn.registerObject("/TimeTracker", &win);
     conn.registerService("org.f5n.timetracker");
 
     return app.exec();

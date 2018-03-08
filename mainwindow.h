@@ -3,9 +3,12 @@
 
 #include <QDateTime>
 #include <QDebug>
+#include <QDir>
 #include <QIcon>
 #include <QMainWindow>
 #include <QSystemTrayIcon>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 #include <QTimer>
 
 #define SECS_PER_DAY 86400
@@ -30,11 +33,13 @@ public slots:
 
 private slots:
     void tick();
+    void backup();
     void toggleWindow(QSystemTrayIcon::ActivationReason reason);
     void quitApp();
 
 private:
     void updateStuff();
+    void updateDB();
     QString formatTime(const qint64 & seconds);
     qint64 getElapsedSeconds();
 
@@ -48,7 +53,8 @@ private:
     QAction * aSep2;
     QAction * aStart;
     QAction * aStop;
-    QTimer * timer;
+    QTimer * tickTimer;
+    QTimer * backupTimer;
 
     QIcon iconDefault;
     QIcon iconGreen;
@@ -56,6 +62,8 @@ private:
     QDateTime lastStarted;
     QDateTime lastTick;
     qint64 timeElapsed;
+    QSqlDatabase db;
+    int dbId;
 };
 
 #endif // MAINWINDOW_H
