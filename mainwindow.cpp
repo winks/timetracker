@@ -5,8 +5,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     trayMenu(new QMenu),
-    iconDefault("../../resources/icon_default.png"),
-    iconGreen("../../resources/icon_green.png"),
+    iconDefault(":/images/icon_default.png"),
+    iconGreen(":/images/icon_green.png"),
     isTracking(false),
     timeElapsed(0)
 {
