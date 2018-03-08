@@ -4,12 +4,27 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT += core gui dbus
+DBUS_ADAPTORS += timetracker.xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG(debug, debug|release) {
+	CONFIG -= release
+	DEBUG_RELEASE = debug
+} else {
+	CONFIG -= debug
+	DEBUG_RELEASE = release
+}
+
 TARGET = timetracker
 TEMPLATE = app
+
+DESTDIR     = bin
+OBJECTS_DIR = build/$$DEBUG_RELEASE
+MOC_DIR     = build/gen/moc
+UI_DIR      = build/gen/ui
+RCC_DIR     = build/gen/rcc
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -25,10 +40,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
 
 FORMS += \
         mainwindow.ui

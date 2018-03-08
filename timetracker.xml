@@ -1,0 +1,6 @@
+<node>
+  <interface name="org.f5n.timetracker">
+    <method name="startTracking"/>
+    <method name="stopTracking"/>
+  </interface>
+</node>

@@ -43,10 +43,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
         if (QSystemTrayIcon::supportsMessages()) {
             trayIcon->showMessage(QString("started timetracker"), QString(),
-                                 QSystemTrayIcon::Information, 500);
+                                 QSystemTrayIcon::Information, 1000);
         }
     } else {
         qDebug() << QString("no tray");
+        this->show();
     }
 }
 

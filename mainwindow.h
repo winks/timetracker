@@ -24,9 +24,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-private slots:
+public slots:
     void startTracking();
     void stopTracking();
+
+private slots:
     void tick();
     void toggleWindow(QSystemTrayIcon::ActivationReason reason);
     void quitApp();
