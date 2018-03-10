@@ -49,27 +49,38 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    QSystemTrayIcon * trayIcon;
-    QMenu * trayMenu;
-    QAction * aElapsed;
-    QAction * aQuit;
-    QAction * aSep1;
-    QAction * aSep2;
-    QAction * aShow;
-    QAction * aStart;
-    QAction * aStop;
-    QTimer * tickTimer;
-    QTimer * backupTimer;
-    QSqlQueryModel * model;
 
     QIcon iconDefault;
     QIcon iconGreen;
+    QSystemTrayIcon * trayIcon;
+
+    QMenu * trayMenu;
+    QAction * aTrayElapsed;
+    QAction * aTrayQuit;
+    QAction * aTraySep1;
+    QAction * aTraySep2;
+    QAction * aTrayShow;
+    QAction * aTrayStart;
+    QAction * aTrayStop;
+
+    QMenu * mainMenu;
+    QAction * aTopMainQuit;
+    QAction * aTopMainSep1;
+    QAction * aTopMainShow;
+    QAction * aTopMainStart;
+    QAction * aTopMainStop;
+
+    QTimer * tickTimer;
+    QTimer * backupTimer;
+
+    QSqlDatabase db;
+    QSqlQueryModel * model;
+    int dbId;
+
     bool isTracking;
+    qint64 timeElapsed;
     QDateTime lastStarted;
     QDateTime lastTick;
-    qint64 timeElapsed;
-    QSqlDatabase db;
-    int dbId;
 };
 
 #endif // MAINWINDOW_H

@@ -1,4 +1,6 @@
 build/
 bin/
 *.pro.user
-Makefile
+Makefile*
+.qmake.stash
+timetracker_resource.rc

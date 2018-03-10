@@ -4,43 +4,60 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    trayMenu(new QMenu),
     iconDefault(":/images/icon_default.png"),
     iconGreen(":/images/icon_green.png"),
+    trayIcon(new QSystemTrayIcon(iconDefault)),
+    trayMenu(new QMenu),
+    mainMenu(new QMenu("&Main")),
+    db(QSqlDatabase::addDatabase("QSQLITE")),
+    model(new QSqlQueryModel),
+    dbId(0),
     isTracking(false),
-    timeElapsed(0),
-    dbId(0)
+    timeElapsed(0)
 {
-    tickTimer = new QTimer(this);
-    tickTimer->start(1000);
-    backupTimer = new QTimer(this);
     ui->setupUi(this);
     this->setWindowIcon(iconDefault);
 
     ui->lblElapsed->setText("Elapsed time (s):");
     ui->lcdElapsed->setDigitCount(5);
     ui->lcdElapsed->setDecMode();
-
-    trayIcon = new QSystemTrayIcon(iconDefault);
-
-    aStart = trayMenu->addAction(QString("St&art"));
-    aStop  = trayMenu->addAction(QString("St&op"));
-    aSep1  = trayMenu->addSeparator();
-    aShow  = trayMenu->addAction(QString("&Show"));
-    aQuit  = trayMenu->addAction(QString("&Quit"));
-
-    aSep2  = new QAction;
-    aElapsed = new QAction;
-    aStop->setEnabled(false);
-
     ui->btnStartStop->setText("Start");
 
-    connect(aStart,     SIGNAL(triggered()), this, SLOT(startTracking()));
-    connect(aStop,      SIGNAL(triggered()), this, SLOT(stopTracking()));
-    connect(aShow,      SIGNAL(triggered()), this, SLOT(toggleWindow()));
-    connect(aQuit,      SIGNAL(triggered()), this, SLOT(close()));
+    ui->topMenu->addMenu(mainMenu);
+    aTopMainStart = mainMenu->addAction(iconGreen, QString("St&art"));
+    aTopMainStop  = mainMenu->addAction(iconDefault, QString("St&op"));
+    aTopMainSep1  = mainMenu->addSeparator();
+    aTopMainShow  = mainMenu->addAction(QString("&Show"));
+    aTopMainQuit  = mainMenu->addAction(QString("&Quit"));
+
+    aTrayStart = trayMenu->addAction(iconGreen, QString("St&art"));
+    aTrayStop  = trayMenu->addAction(iconDefault, QString("St&op"));
+    aTraySep1  = trayMenu->addSeparator();
+    aTrayShow  = trayMenu->addAction(QString("&Show"));
+    aTrayQuit  = trayMenu->addAction(QString("&Quit"));
+
+    aTraySep2  = new QAction;
+    aTrayElapsed = new QAction;
+    aTrayStop->setEnabled(false);
+    aTopMainStop->setEnabled(false);
+
+    tickTimer = new QTimer(this);
+    tickTimer->start(1000);
+    backupTimer = new QTimer(this);
+
     connect(tickTimer,  SIGNAL(timeout()),   this, SLOT(tick()));
     connect(backupTimer,SIGNAL(timeout()),   this, SLOT(backup()));
+
+    connect(aTrayStart,    SIGNAL(triggered()), this, SLOT(startTracking()));
+    connect(aTrayStop,     SIGNAL(triggered()), this, SLOT(stopTracking()));
+    connect(aTrayShow,     SIGNAL(triggered()), this, SLOT(toggleWindow()));
+    connect(aTrayQuit,     SIGNAL(triggered()), this, SLOT(close()));
+
+    connect(aTopMainStart, SIGNAL(triggered()), this, SLOT(startTracking()));
+    connect(aTopMainStop,  SIGNAL(triggered()), this, SLOT(stopTracking()));
+    connect(aTopMainShow,  SIGNAL(triggered()), this, SLOT(toggleWindow()));
+    connect(aTopMainQuit,  SIGNAL(triggered()), this, SLOT(close()));
+
     connect(ui->btnStartStop, SIGNAL(clicked(bool)), this, SLOT(toggleTracking()));
     connect(trayIcon,         SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayClicked(QSystemTrayIcon::ActivationReason)));
@@ -53,13 +70,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
         if (QSystemTrayIcon::supportsMessages()) {
             trayIcon->showMessage(QString("started timetracker"), QString(),
-                                 QSystemTrayIcon::Information, 1000);
+                                  QSystemTrayIcon::Information, 1000);
         }
     } else {
         qDebug() << QString("no tray");
         toggleWindow();
     }
-    db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(QDir::homePath() + QDir::separator() + "timetracker.sqlite");
     db.open();
     QSqlQuery sql;
@@ -78,7 +94,6 @@ MainWindow::MainWindow(QWidget *parent) :
         qDebug() << QString("SQL ROWID: %1").arg(dbId);
         break;
     }
-    model = new QSqlQueryModel;
     model->setQuery("SELECT id, elapsed, created, updated "
                     "FROM timetracker ORDER BY created ASC");
     model->setHeaderData(0, Qt::Horizontal, "ID");
@@ -86,6 +101,7 @@ MainWindow::MainWindow(QWidget *parent) :
     model->setHeaderData(2, Qt::Horizontal, "Created");
     model->setHeaderData(3, Qt::Horizontal, "Updated");
     ui->tblHistory->setModel(model);
+    ui->tblHistory->scrollToBottom();
 }
 
 MainWindow::~MainWindow()
@@ -93,15 +109,23 @@ MainWindow::~MainWindow()
     updateDB();
     delete model;
     db.close();
-    delete aElapsed;
-    delete aQuit;
-    delete aSep1;
-    delete aSep2;
-    delete aShow;
-    delete aStart;
-    delete aStop;
-    delete trayIcon;
+    delete backupTimer;
+    delete tickTimer;
+    delete aTopMainQuit;
+    delete aTopMainSep1;
+    delete aTopMainShow;
+    delete aTopMainStart;
+    delete aTopMainStop;
+    delete mainMenu;
+    delete aTrayElapsed;
+    delete aTrayQuit;
+    delete aTraySep1;
+    delete aTraySep2;
+    delete aTrayShow;
+    delete aTrayStart;
+    delete aTrayStop;
     delete trayMenu;
+    delete trayIcon;
     delete ui;
 }
 
@@ -201,10 +225,12 @@ void MainWindow::toggleWindow()
     }
     if (isVisible()) {
         this->hide();
-        aShow->setText("&Show");
+        aTrayShow->setText("&Show");
+        aTopMainShow->setText("&Show");
     } else {
         this->show();
-        aShow->setText("&Hide");
+        aTrayShow->setText("&Hide");
+        aTopMainShow->setText("&Hide");
     }
 }
 
@@ -222,29 +248,38 @@ void MainWindow::updateStuff()
     // set icon based on current tracking status
     if (isTracking) {
         trayIcon->setIcon(iconGreen);
-        aStop->setEnabled(true);
-        aStart->setEnabled(false);
+        this->setWindowIcon(iconGreen);
+        aTrayStop->setEnabled(true);
+        aTrayStart->setEnabled(false);
+        aTopMainStop->setEnabled(true);
+        aTopMainStart->setEnabled(false);
         ui->btnStartStop->setText("Stop");
         if(!backupTimer->isActive()) {
-            backupTimer->start(10000);
+            backupTimer->start(60000);
         }
     } else {
         trayIcon->setIcon(iconDefault);
-        aStop->setEnabled(false);
-        aStart->setEnabled(true);
+        this->setWindowIcon(iconDefault);
+        aTrayStop->setEnabled(false);
+        aTrayStart->setEnabled(true);
+        aTopMainStop->setEnabled(false);
+        aTopMainStart->setEnabled(true);
         ui->btnStartStop->setText("Start");
         backupTimer->stop();
     }
     // update "elapsed" context menu item
     if (timeElapsed > 0) {
         QString elapsed = QString("elapsed: %1").arg(formatTime(getElapsedSeconds()));
-        aElapsed->setText(elapsed);
+        aTrayElapsed->setText(elapsed);
         if (trayMenu->actions().size() == 5) {
-            trayMenu->insertAction(aSep1, aElapsed);
-            aSep2 = trayMenu->insertSeparator(aElapsed);
+            trayMenu->insertAction(aTraySep1, aTrayElapsed);
+            aTraySep2 = trayMenu->insertSeparator(aTrayElapsed);
         }
         trayMenu->update();
+
+        ui->statusBar->showMessage(QString("Elapsed: %1").arg(formatTime(getElapsedSeconds())));
     }
+    // update lcd display
     ui->lcdElapsed->display(QString::number(getElapsedSeconds()));
 }
 

@@ -26,6 +26,8 @@ MOC_DIR     = build/gen/moc
 UI_DIR      = build/gen/ui
 RCC_DIR     = build/gen/rcc
 
+RC_ICONS = resources/icon.ico
+
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
