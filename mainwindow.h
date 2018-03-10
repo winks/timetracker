@@ -31,6 +31,8 @@ public:
 public slots:
     void startTracking();
     void stopTracking();
+    void toggleWindow();
+    int getElapsedSeconds();
 
 private slots:
     void tick();
@@ -38,16 +40,19 @@ private slots:
     void trayClicked(QSystemTrayIcon::ActivationReason reason);
     void changeEvent(QEvent * event);
     void quitApp();
-    void toggleWindow();
     void toggleTracking();
 
 private:
-    void updateStuff();
+    void updateGUI();
     void updateDB();
+    void setupDB();
     QString formatTime(const qint64 & seconds);
-    qint64 getElapsedSeconds();
 
 private:
+    int tickTimerDuration = 1000;
+    int backupTimerDuration = 60000;
+    int startupTooltipDuration = 1000;
+
     Ui::MainWindow *ui;
 
     QIcon iconDefault;

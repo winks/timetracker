@@ -2,5 +2,9 @@
   <interface name="org.f5n.timetracker">
     <method name="startTracking"/>
     <method name="stopTracking"/>
+    <method name="toggleWindow"/>
+    <method name="getElapsedSeconds">
+      <arg name="response" type="i" direction="out"/>
+    </method>
   </interface>
 </node>

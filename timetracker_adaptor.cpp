@@ -33,6 +33,14 @@ TimetrackerAdaptor::~TimetrackerAdaptor()
     // destructor
 }
 
+int TimetrackerAdaptor::getElapsedSeconds()
+{
+    // handle method call org.f5n.timetracker.getElapsedSeconds
+    int response;
+    QMetaObject::invokeMethod(parent(), "getElapsedSeconds", Q_RETURN_ARG(int, response));
+    return response;
+}
+
 void TimetrackerAdaptor::startTracking()
 {
     // handle method call org.f5n.timetracker.startTracking
@@ -43,5 +51,11 @@ void TimetrackerAdaptor::stopTracking()
 {
     // handle method call org.f5n.timetracker.stopTracking
     QMetaObject::invokeMethod(parent(), "stopTracking");
+}
+
+void TimetrackerAdaptor::toggleWindow()
+{
+    // handle method call org.f5n.timetracker.toggleWindow
+    QMetaObject::invokeMethod(parent(), "toggleWindow");
 }
 

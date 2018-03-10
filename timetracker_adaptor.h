@@ -34,6 +34,10 @@ class TimetrackerAdaptor: public QDBusAbstractAdaptor
 "  <interface name=\"org.f5n.timetracker\">\n"
 "    <method name=\"startTracking\"/>\n"
 "    <method name=\"stopTracking\"/>\n"
+"    <method name=\"toggleWindow\"/>\n"
+"    <method name=\"getElapsedSeconds\">\n"
+"      <arg direction=\"out\" type=\"i\" name=\"response\"/>\n"
+"    </method>\n"
 "  </interface>\n"
         "")
 public:
@@ -42,8 +46,10 @@ public:
 
 public: // PROPERTIES
 public Q_SLOTS: // METHODS
+    int getElapsedSeconds();
     void startTracking();
     void stopTracking();
+    void toggleWindow();
 Q_SIGNALS: // SIGNALS
 };
 
