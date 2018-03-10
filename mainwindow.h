@@ -9,6 +9,7 @@
 #include <QSystemTrayIcon>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
+#include <QtSql/QSqlQueryModel>
 #include <QTimer>
 
 #define SECS_PER_DAY 86400
@@ -34,8 +35,11 @@ public slots:
 private slots:
     void tick();
     void backup();
-    void toggleWindow(QSystemTrayIcon::ActivationReason reason);
+    void trayClicked(QSystemTrayIcon::ActivationReason reason);
+    void changeEvent(QEvent * event);
     void quitApp();
+    void toggleWindow();
+    void toggleTracking();
 
 private:
     void updateStuff();
@@ -51,10 +55,12 @@ private:
     QAction * aQuit;
     QAction * aSep1;
     QAction * aSep2;
+    QAction * aShow;
     QAction * aStart;
     QAction * aStop;
     QTimer * tickTimer;
     QTimer * backupTimer;
+    QSqlQueryModel * model;
 
     QIcon iconDefault;
     QIcon iconGreen;
