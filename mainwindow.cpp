@@ -63,6 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this, SLOT(trayClicked(QSystemTrayIcon::ActivationReason)));
 
     trayIcon->setContextMenu(trayMenu);
+    trayIcon->setToolTip(QString("TimeTracker"));
 
     if (QSystemTrayIcon::isSystemTrayAvailable()) {
         trayIcon->setIcon(iconDefault);
@@ -299,20 +300,30 @@ QString MainWindow::formatTime(const qint64 & seconds_)
     QString rv;
     qint64 seconds = seconds_;
     qint64 tmp;
+    bool needSpace = false;
     if (seconds >= SECS_PER_DAY) {
         tmp = (seconds - (seconds % SECS_PER_DAY)) / SECS_PER_DAY;
         rv += QString::number(tmp);
         rv += " d";
         seconds -= (tmp * SECS_PER_DAY);
+        needSpace = true;
     }
     if (seconds >= SECS_PER_HOUR) {
         tmp = (seconds - (seconds % SECS_PER_HOUR)) / SECS_PER_HOUR;
+        if (needSpace) {
+            rv += " ";
+            needSpace = false;
+        }
         rv += QString::number(tmp);
         rv += " h";
         seconds -= (tmp * SECS_PER_HOUR);
     }
     if (seconds >= SECS_PER_MIN) {
         tmp = (seconds - (seconds % SECS_PER_MIN)) / SECS_PER_MIN;
+        if (needSpace) {
+            rv += " ";
+            needSpace = false;
+        }
         rv += QString::number(tmp);
         rv += "m";
         seconds -= (tmp * SECS_PER_MIN);
