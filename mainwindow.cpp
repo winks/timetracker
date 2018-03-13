@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     trayIcon(new QSystemTrayIcon(iconDefault)),
     trayMenu(new QMenu),
     mainMenu(new QMenu("&Main")),
+    helpMenu(new QMenu("&Help")),
     db(QSqlDatabase::addDatabase("QSQLITE")),
     model(new QSqlQueryModel),
     dbId(0),
@@ -35,6 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     aTopMainSep1  = mainMenu->addSeparator();
     aTopMainShow  = mainMenu->addAction(QString("&Show"));
     aTopMainQuit  = mainMenu->addAction(QString("&Quit"));
+
+    ui->topMenu->addMenu(helpMenu);
+    aTopHelpAbout = helpMenu->addAction(QString("&About"));
 
     aTrayStart = trayMenu->addAction(iconGreen, QString("St&art"));
     aTrayStop  = trayMenu->addAction(iconDefault, QString("St&op"));
@@ -63,6 +67,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aTopMainStop,  SIGNAL(triggered()), this, SLOT(stopTracking()));
     connect(aTopMainShow,  SIGNAL(triggered()), this, SLOT(toggleWindow()));
     connect(aTopMainQuit,  SIGNAL(triggered()), this, SLOT(close()));
+
+    connect(aTopHelpAbout, SIGNAL(triggered()), this, SLOT(showAboutDialog()));
 
     connect(ui->btnStartStop, SIGNAL(clicked(bool)), this, SLOT(toggleTracking()));
     connect(ui->btnReset,     SIGNAL(clicked(bool)), this, SLOT(resetTracking()));
@@ -95,6 +101,8 @@ MainWindow::~MainWindow()
     db.close();
     delete backupTimer;
     delete tickTimer;
+    delete aTopHelpAbout;
+    delete helpMenu;
     delete aTopMainQuit;
     delete aTopMainSep1;
     delete aTopMainShow;
@@ -336,6 +344,11 @@ void MainWindow::updateGUI()
     }
     // update lcd display
     ui->lcdElapsed->display(QString::number(getElapsedSeconds()));
+}
+
+void MainWindow::showAboutDialog()
+{
+    winAbout.show();
 }
 
 QString MainWindow::formatTime(const qint64 & seconds_)

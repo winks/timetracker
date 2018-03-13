@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "src/ui/aboutdialog.h"
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
@@ -42,6 +43,7 @@ private slots:
     void changeEvent(QEvent * event);
     void quitApp();
     void toggleTracking();
+    void showAboutDialog();
 
 private:
     void newEntry();
@@ -79,6 +81,9 @@ private:
     QAction * aTopMainStart;
     QAction * aTopMainStop;
 
+    QMenu * helpMenu;
+    QAction * aTopHelpAbout;
+
     QTimer * tickTimer;
     QTimer * backupTimer;
 
@@ -90,6 +95,8 @@ private:
     qint64 timeElapsed;
     QDateTime lastStarted;
     QDateTime lastTick;
+
+    AboutDialog winAbout;
 };
 
 #endif // MAINWINDOW_H

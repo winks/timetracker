@@ -26,7 +26,15 @@ MOC_DIR     = build/gen/moc
 UI_DIR      = build/gen/ui
 RCC_DIR     = build/gen/rcc
 
+VERSION = 0.1.0.0
 RC_ICONS = resources/icon.ico
+QMAKE_TARGET_COMPANY = f5n.org
+QMAKE_TARGET_PRODUCT = TimeTracker
+QMAKE_TARGET_DESCRIPTION = tracking times
+QMAKE_TARGET_COPYRIGHT = something 2018
+
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+DEFINES += APP_NAME=\\\"$$QMAKE_TARGET_PRODUCT\\\"
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -41,14 +49,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
+    src/ui/aboutdialog.cpp
 
 HEADERS += \
-        mainwindow.h \
+    mainwindow.h \
+    src/ui/aboutdialog.h
 
 FORMS += \
-        mainwindow.ui
+    mainwindow.ui \
+    src/ui/aboutdialog.ui
 
 RESOURCES += \
     timetracker.qrc
