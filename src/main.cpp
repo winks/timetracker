@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QtDBus/QDBusConnection>
 
-#include "mainwindow.h"
+#include "src/ui/mainwindow.h"
 #include "timetracker_adaptor.h"
 
 int main(int argc, char *argv[])

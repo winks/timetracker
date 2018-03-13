@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT += core gui dbus sql
-DBUS_ADAPTORS += timetracker.xml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -49,17 +48,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-    main.cpp \
-    mainwindow.cpp \
-    src/ui/aboutdialog.cpp
+    src/main.cpp \
+    src/ui/aboutdialog.cpp \
+    src/ui/mainwindow.cpp \
 
 HEADERS += \
-    mainwindow.h \
-    src/ui/aboutdialog.h
+    src/ui/aboutdialog.h \
+    src/ui/mainwindow.h \
 
 FORMS += \
-    mainwindow.ui \
-    src/ui/aboutdialog.ui
+    src/ui/aboutdialog.ui \
+    src/ui/mainwindow.ui \
 
 RESOURCES += \
-    timetracker.qrc
+    src/timetracker.qrc
+
+DBUS_ADAPTORS += \
+    src/timetracker.xml
