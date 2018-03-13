@@ -22,6 +22,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lcdElapsed->setDigitCount(5);
     ui->lcdElapsed->setDecMode();
     ui->btnStartStop->setText("Start");
+    ui->btnReset->setText("Reset");
+    ui->btnReset->setEnabled(false);
+    ui->lblProject->setText("Project:");
+    ui->inputProject->setText(defaultProject);
+    ui->tblHistory->setSortingEnabled(true);
+    ui->tblHistory->setCornerButtonEnabled(false);
 
     ui->topMenu->addMenu(mainMenu);
     aTopMainStart = mainMenu->addAction(iconGreen, QString("St&art"));
@@ -59,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aTopMainQuit,  SIGNAL(triggered()), this, SLOT(close()));
 
     connect(ui->btnStartStop, SIGNAL(clicked(bool)), this, SLOT(toggleTracking()));
+    connect(ui->btnReset,     SIGNAL(clicked(bool)), this, SLOT(resetTracking()));
     connect(trayIcon,         SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayClicked(QSystemTrayIcon::ActivationReason)));
 
@@ -78,6 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
         toggleWindow();
     }
     setupDB();
+    updateModel();
 }
 
 MainWindow::~MainWindow()
@@ -109,11 +117,17 @@ void MainWindow::startTracking()
 {
     if (isTracking) return;
     isTracking = true;
+    if (timeElapsed <= 0) {
+        newEntry();
+    } else {
+        updateDB();
+    }
 
     QDateTime now = QDateTime::currentDateTimeUtc();
     qDebug() << QString("startTracking @ %1").arg(now.toString());
     lastStarted = now;
     lastTick = now;
+    updateModel();
     updateGUI();
 }
 
@@ -127,18 +141,61 @@ void MainWindow::stopTracking()
     qint64 diff = lastTick.msecsTo(now);
     timeElapsed += diff;
     qDebug() << QString("stopTracking += %1 (%2)").arg(diff).arg(getElapsedSeconds());
-    updateGUI();
     updateDB();
+    updateGUI();
+}
+
+void MainWindow::resetTracking()
+{
+    if (isTracking) return;
+    if (timeElapsed <= 0) return;
+    updateDB();
+    timeElapsed = 0;
+    updateGUI();
+}
+
+void MainWindow::updateModel()
+{
+    model->setQuery("SELECT project, elapsed, created, updated "
+                    "FROM timetracker ORDER BY created ASC");
+    //model->setHeaderData(0, Qt::Horizontal, "ID");
+    model->setHeaderData(0, Qt::Horizontal, "Project");
+    model->setHeaderData(1, Qt::Horizontal, "Elapsed");
+    model->setHeaderData(2, Qt::Horizontal, "Created");
+    model->setHeaderData(3, Qt::Horizontal, "Updated");
+    ui->tblHistory->setModel(model);
+    ui->tblHistory->scrollToBottom();
 }
 
 void MainWindow::updateDB()
 {
+    QString projectName = ui->inputProject->text().length() > 0 ? ui->inputProject->text() : defaultProject;
     QSqlQuery sql;
-    sql.prepare("UPDATE timetracker SET elapsed = :elapsed, updated = CURRENT_TIMESTAMP WHERE id = :id");
+    sql.prepare("UPDATE timetracker SET elapsed = :elapsed, project = :project, updated = CURRENT_TIMESTAMP WHERE id = :id");
     sql.bindValue(":id", dbId);
+    sql.bindValue(":project", projectName);
     sql.bindValue(":elapsed", getElapsedSeconds());
     bool rv = sql.exec();
     qDebug() << QString("SQL UPDATE: [r:%1] %2 @ %3").arg(rv).arg(getElapsedSeconds()).arg(QDateTime::currentDateTimeUtc().toString());
+    updateModel();
+}
+
+void MainWindow::newEntry()
+{
+    QString projectName = ui->inputProject->text().length() > 0 ? ui->inputProject->text() : defaultProject;
+    QSqlQuery sql;
+    sql.prepare("INSERT INTO timetracker(project, elapsed, created, updated) "
+                "VALUES(:project, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
+    sql.bindValue(":project", projectName);
+    bool rv = sql.exec();
+    qDebug() << QString("SQL NEWROW [r:%1]").arg(rv);
+    sql.exec("SELECT last_insert_rowid() FROM timetracker");
+    while (sql.next()) {
+        dbId = sql.value(0).toInt();
+        qDebug() << QString("SQL ROWID: %1").arg(dbId);
+        break;
+    }
+    updateModel();
 }
 
 void MainWindow::setupDB()
@@ -153,24 +210,6 @@ void MainWindow::setupDB()
                        "created datetime,"
                        "updated datetime)");
     qDebug() << QString("SQL CREATE [r:%1]").arg(rv);
-    rv = sql.exec("INSERT INTO timetracker(project, elapsed, created, updated) "
-                  "VALUES('default', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)");
-    qDebug() << QString("SQL NEWROW [r:%1]").arg(rv);
-    sql.exec("SELECT last_insert_rowid() FROM timetracker");
-    while (sql.next()) {
-        dbId = sql.value(0).toInt();
-        qDebug() << QString("SQL ROWID: %1").arg(dbId);
-        break;
-    }
-    model->setQuery("SELECT id, project, elapsed, created, updated "
-                    "FROM timetracker ORDER BY created ASC");
-    model->setHeaderData(0, Qt::Horizontal, "ID");
-    model->setHeaderData(1, Qt::Horizontal, "Project");
-    model->setHeaderData(2, Qt::Horizontal, "Elapsed");
-    model->setHeaderData(3, Qt::Horizontal, "Created");
-    model->setHeaderData(4, Qt::Horizontal, "Updated");
-    ui->tblHistory->setModel(model);
-    ui->tblHistory->scrollToBottom();
 }
 
 void MainWindow::tick()
@@ -182,7 +221,7 @@ void MainWindow::tick()
     qint64 diff = lastTick.msecsTo(now);
     lastTick = now;
     timeElapsed += diff;
-    qDebug() << QString("tick %1").arg(getElapsedSeconds());
+    if (getElapsedSeconds() % 10 == 0) qDebug() << QString("tick %1").arg(getElapsedSeconds());
     updateGUI();
 }
 
@@ -266,6 +305,8 @@ void MainWindow::updateGUI()
         aTopMainStop->setEnabled(true);
         aTopMainStart->setEnabled(false);
         ui->btnStartStop->setText("Stop");
+        ui->btnReset->setEnabled(false);
+        ui->inputProject->setEnabled(false);
         if(!backupTimer->isActive()) {
             backupTimer->start(backupTimerDuration);
         }
@@ -277,6 +318,8 @@ void MainWindow::updateGUI()
         aTopMainStop->setEnabled(false);
         aTopMainStart->setEnabled(true);
         ui->btnStartStop->setText("Start");
+        ui->btnReset->setEnabled(true);
+        ui->inputProject->setEnabled(true);
         backupTimer->stop();
     }
     // update "elapsed" context menu item

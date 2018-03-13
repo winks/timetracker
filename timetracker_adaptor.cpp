@@ -41,6 +41,12 @@ int TimetrackerAdaptor::getElapsedSeconds()
     return response;
 }
 
+void TimetrackerAdaptor::resetTracking()
+{
+    // handle method call org.f5n.timetracker.resetTracking
+    QMetaObject::invokeMethod(parent(), "resetTracking");
+}
+
 void TimetrackerAdaptor::startTracking()
 {
     // handle method call org.f5n.timetracker.startTracking

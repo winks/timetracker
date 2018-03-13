@@ -38,26 +38,40 @@
       <property name="bottomMargin">
        <number>10</number>
       </property>
-      <item row="1" column="0" colspan="4">
+      <item row="1" column="0" colspan="6">
        <widget class="QTableView" name="tblHistory"/>
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="lblElapsed">
         <property name="text">
-         <string>TextLabel</string>
+         <string>lblElapsed</string>
         </property>
        </widget>
-      </item>
-      <item row="0" column="3">
-       <widget class="QWidget" name="placeholder" native="true"/>
       </item>
       <item row="0" column="1">
        <widget class="QLCDNumber" name="lcdElapsed"/>
       </item>
-      <item row="0" column="2">
+      <item row="0" column="4">
        <widget class="QPushButton" name="btnStartStop">
         <property name="text">
-         <string>PushButton</string>
+         <string>btnStartStop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QPushButton" name="btnReset">
+        <property name="text">
+         <string>btnReset</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLineEdit" name="inputProject"/>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lblProject">
+        <property name="text">
+         <string>lblProject</string>
         </property>
        </widget>
       </item>

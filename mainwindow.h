@@ -31,6 +31,7 @@ public:
 public slots:
     void startTracking();
     void stopTracking();
+    void resetTracking();
     void toggleWindow();
     int getElapsedSeconds();
 
@@ -43,15 +44,18 @@ private slots:
     void toggleTracking();
 
 private:
-    void updateGUI();
-    void updateDB();
+    void newEntry();
     void setupDB();
+    void updateDB();
+    void updateGUI();
+    void updateModel();
     QString formatTime(const qint64 & seconds);
 
 private:
     int tickTimerDuration = 1000;
     int backupTimerDuration = 60000;
     int startupTooltipDuration = 1000;
+    QString defaultProject = QString("default");
 
     Ui::MainWindow *ui;
 
