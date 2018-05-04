@@ -46,14 +46,14 @@ MainWindow::MainWindow(QWidget *parent) :
     aTrayShow  = trayMenu->addAction(QString("&Show"));
     aTrayQuit  = trayMenu->addAction(QString("&Quit"));
 
-    aTraySep2  = new QAction;
-    aTrayElapsed = new QAction;
+    aTraySep2    = new QAction(parent);
+    aTrayElapsed = new QAction(parent);
     aTrayStop->setEnabled(false);
     aTopMainStop->setEnabled(false);
 
-    tickTimer = new QTimer(this);
-    tickTimer->start(tickTimerDuration);
     backupTimer = new QTimer(this);
+    tickTimer   = new QTimer(this);
+    tickTimer->start(tickTimerDuration);
 
     connect(tickTimer,  SIGNAL(timeout()),   this, SLOT(tick()));
     connect(backupTimer,SIGNAL(timeout()),   this, SLOT(backup()));

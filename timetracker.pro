@@ -15,6 +15,7 @@ CONFIG(debug, debug|release) {
 	CONFIG -= debug
 	DEBUG_RELEASE = release
 }
+CONFIG += c++11
 
 TARGET = timetracker
 TEMPLATE = app
